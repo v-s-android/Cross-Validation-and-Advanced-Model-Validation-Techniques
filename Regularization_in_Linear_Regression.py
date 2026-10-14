@@ -104,6 +104,10 @@ lasso_reg = Lasso( alpha = 0.2 ) # alpha=0.2: Controls the strength of regulariz
 lasso_reg.fit(X, y_outlier)
 y_outlier_pred_lasso = lasso_reg.predict(X)
 
+"""
+Ridge and Lasso are regularized linear regression models; Ridge shrinks coefficients, while Lasso can shrink some coefficients to zero and perform feature selection.
+"""
+
 # Print the regression results
 regression_results (y_outlier , y_outlier_pred_lin, "Regular")
 regression_results (y_outlier , y_outlier_pred_lin, "Ridge")
@@ -130,8 +134,108 @@ r2:  0.7003
 MAE:  0.8597
 MSE:  1.1651
 RMSE:  1.0794
+
+Judging from the low R^2 values, these are poor predictions
 """
 
+"""
+Plot the data and the predictions for comparison
+Let's see how well the predictions match expected ideal values.
+"""
+
+plt.figure( figsize = (12, 6))
+
+# Scatter plot of the original data with outliers
+plt.scatter(X, y , alpha = 0.4, ec = 'k' , label="Original data")
+
+# Plot the ideal regression line (noise free data)
+plt.plot(X, y_ideal, lw = 2, color='k' label = "Ideal, noise free data")
+
+# Plot predictions from the simple linear regression model
+plt.plot(X, y_outlier_pred_lin, lw = 5 , label = "Linear regression")
+
+# Plot predictions from the ridge regression model
+plt.plot(X, y_outlier_pred_ridge, lw= 2, linestyle = '--', label = "Ridge regression")
+
+# Plot predictions from the lasso regression model
+plt.plot(X, y_outlier_pred_lasso, lw= 2, color = 'g', label = "Ridge regression")
+
+plt.xlabel('Feature (X)')
+plt.ylabel('Target (y)')
+plt.title('Comparison of Predictions with Outliers')
+plt.legend()
+plt.show()
+
+# Exercise 2. Build the models and the prediction plots from the same data, excluding the outliers
+
+# Fit a simple linear regression model
+lin_reg = LinearRegression()
+lin_reg.fit(X, y)
+y_pred_lin = lin_reg.predict(X)
+
+# Fit a ridge regression model (regularization to control large coefficients)
+ridge_reg = Ridge(alpha=1)
+ridge_reg.fit(X, y)
+y_pred_ridge = ridge_reg.predict(X)
+
+# Fit a lasso regression model (regularization to control large coefficients)
+lasso_reg = Lasso(alpha=0.2)
+lasso_reg.fit(X, y)
+y_pred_lasso = lasso_reg.predict(X)
+
+# Print the regression results
+regression_results(y, y_pred_lin, 'Ordinary')
+regression_results(y, y_pred_ridge, 'Ridge')
+regression_results(y, y_pred_lasso, 'Lasso')
+
+"""
+Evaluation metrics for Ordinary Linear Regression
+explained_variance:  0.7492
+r2:  0.7492
+MAE:  0.7873
+MSE:  0.975
+RMSE:  0.9874
+
+Evaluation metrics for Ridge Linear Regression
+explained_variance:  0.7492
+r2:  0.7492
+MAE:  0.7874
+MSE:  0.975
+RMSE:  0.9874
+
+Evaluation metrics for Lasso Linear Regression
+explained_variance:  0.7191
+r2:  0.7191
+MAE:  0.8408
+MSE:  1.0923
+RMSE:  1.0451
+"""
+
+
+# Plot the data and the predictions
+plt.figure(figsize=(12, 8))
+
+# # Scatter plot of the original data
+plt.scatter(X, y, alpha=0.4, ec='k', label='Original Data')
+
+# Plot the ideal regression line (noise free data)
+plt.plot(X, y_ideal,  linewidth=2, color='k',label='Ideal, noise free data')
+
+# Plot predictions from the simple linear regression model
+plt.plot(X, y_pred_lin,  linewidth=5, label='Linear Regression')
+
+# Plot predictions from the ridge regression model
+plt.plot(X, y_pred_ridge, linestyle='--',linewidth=2, label='Ridge Regression')
+
+# Plot predictions from the lasso regression model
+plt.plot(X, y_pred_lasso,  linewidth=2, label='Lasso Regression')
+
+plt.xlabel('Feature (X)')
+plt.ylabel('Target (y)')
+
+plt.title('Comparison of predictions with no outliers')
+plt.legend()
+plt.show()
 
   
 
