@@ -305,3 +305,49 @@ RMSE:  17.4541
 Explained variances are under 50%, and R^2 is very low.
 However, ther result for Lasso is stellar.
 """
+
+"""
+Plot the predictions vs actuals
+Let's get some more insight into the perfomance of these models.
+"""
+
+fig, axes = plt.subplot(2, 3, figsize = (18,10), sharey = True)
+
+axes[0,0].scatter(y_test, y_pred_lin, color= 'red', label = "Linear")
+axes[0,0].plot([y_test.min(), y_test.max()], [y_test.min() , y_test.max()], 'k--')
+axes[0,0].set_title("Linear regression")
+axes[0,0].set_xlabel("Actual")
+axes[0,0].set_ylabel("Predicted")
+
+axes[0,1].scatter(y_test, y_pred_ridge, color= 'red', label = "Ridge")
+axes[0,1].plot([y_test.min(), y_test.max()], [y_test.min() , y_test.max()], 'k--')
+axes[0,1].set_title("Ridge regression")
+axes[0,1].set_xlabel("Actual")
+axes[0,1].set_ylabel("Predicted")
+
+axes[0,2].scatter(y_test, y_pred_lasso, color= 'red', label = "Lasso")
+axes[0,2].plot([y_test.min(), y_test.max()], [y_test.min() , y_test.max()], 'k--')
+axes[0,2].set_title("Lasso regression")
+axes[0,2].set_xlabel("Actual")
+axes[0,2].set_ylabel("Predicted")
+
+# Line plots for predictions compared to actual and ideal predictions
+axes[1,0].plot(y_test, label = "Actual" , lw = 2)
+axes[1,0].plot(y_pred_lin, label = "Linear", '--', color = "red")
+axes[1,0].set_title("Linear vs Ideal")
+axes[1,0].legend()
+
+axes[1,1].plot(y_test, label = "Actual" , lw = 2)
+axes[1,1].plot(y_pred_ridge, label = "Ridge", '--', color = "green")
+axes[1,1].set_title("Ridge vs Ideal")
+axes[1,1].legend()
+
+axes[1,2].plot(y_test, label = "Actual" , lw = 2)
+axes[1,2].plot(y_pred_lasso, label = "Lasso", '--', color = "blue")
+axes[1,2].set_title("Lasso vs Ideal")
+axes[1,2].legend()
+
+plt.tight_layout()
+plt.show()
+
+
