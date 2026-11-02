@@ -72,7 +72,7 @@ Let's go ahead and fit the model to the training data and evaluate its accuracy.
 pipeline.fit(X_train, y_train)
 # Measure the pipeline accuracy on the test data
 test_score = pipeline.score(X_test, y_test)
-print(f"{test_score : .3f}")
+print(f"{test_score : .3f}") # 0.900
 
 # Get the model predictions
 y_pred = pipeline.predict(X_test)
@@ -102,3 +102,74 @@ plt.ylabel('Actual')
 # Show the plot
 plt.tight_layout()
 plt.show()
+
+"""
+Instantiate the pipeline
+We'll preprocess the data by scaling it and transforming it onto a to-be-determined number of principle components, follow that up with a KNN model classifier,
+and combine these estimators into a pipeline.We'll then optimize the pipeline using crossvalidation over a hyperparameter grid search. This will allow us find the best model
+for the set of trial hyperparamters.
+"""
+
+pipeline = Pipeline(
+    [
+        ('scalar', StandardScalar()),
+        ('pca', PCA()),
+        ('knn', KNeighborsClassifier())
+    ]
+)
+
+#Define a model parameter grid to search over
+# Hyperparameter search grid for numbers of PCA components and KNN neighbors
+param_grid = {'pca__n_components': [2, 3],
+              'knn__n_neighbors': [3, 5, 7]
+             }
+"""
+Choose a cross validation method
+To ensure the target is stratified, we can use scikit-learn's StratifiedKFold cross-validation class.
+"""
+cv = StratifiedKFold(n_splits = 5, shuffle = True, random_state = 10)
+
+
+"""
+Exercise 4. Determine the best parameters
+Pass your pipeline, param_grid, and the StratifiedKFold cross validation method to GridSearchCV
+"""
+gird_search = GridSearchCV(
+    estimator = pipeline,
+    param_grid = param_grid,
+    cv = cv,
+    score = "accuracy",
+    verbose=2
+)
+
+# Fit the best GridSearchCV model to the training data
+grid_search.fit(X_train, y_train)
+
+# Exercise 5. Evaluate the accuracy of the best model on the test set
+new_score = grid_search.score(X_test, y_test)
+print(f"{new_score : .3f}") # 0.933
+
+# Display the best parameters
+grid_search.best_params_  # {'knn__n_neighbors': 3, 'pca__n_components': 3}
+
+# Plot the confusion matrix for the predictions on the test set
+y_pred = grid_search.predict(X_test)
+
+# Generate the confusion matrix for KNN
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+plt.figure()
+# Create a single plot for the confusion matrix
+sns.heatmap(conf_matrix , annot=True, cmap = "Blues", xticklabels = labels , yticklabels = labels , fmt = d )
+
+# Set the title and labels
+plt.title('KNN Classification Testing Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
+
+    
