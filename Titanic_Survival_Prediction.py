@@ -157,7 +157,7 @@ param_grid = {
 cv = StratifiedKFold(n_splits = 5, shuffle=True)
 
 # Exercise 3. Train the pipeline model
-grid_search = GridSearchCV(
+model = GridSearchCV(
   estimator = pipeline,
   cv = cv,
   param_grid = param_grid,
@@ -165,7 +165,7 @@ grid_search = GridSearchCV(
   verbose = 2
 )
 
-grid_search.fit(X_train, y_train)
+model.fit(X_train, y_train)
 """
 Fitting 5 folds for each of 12 candidates, totalling 60 fits
 [CV] END classifier__max_depth=None, classifier__min_samples_split=2, classifier__n_estimators=50; total time=   0.1s
@@ -197,7 +197,7 @@ Exercise 4. Get the model predictions from the grid search estimator on the unse
 Also print a classification report
 """
 
-y_pred = grid_search.predict(X_test)
+y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))
 
 """
@@ -224,4 +224,48 @@ plt.ylabel('Actual')
 plt.tight_layout()
 plt.show()
 
+"""
+Feature importances¶
+Let's figure out how to get the feature importances of our overall model. You'll need to know how to do this for your final project.
+First, to obtain the categorical feature importances, we have to work our way backward through the modelling pipeline to associate the feature importances
+with their one-hot encoded input features that were transformed from the original categorical features.
+
+We don't need to trace back through the pipeline for the numerical features, because we didn't transfrom them into new ones in any way.
+Remember, we went from categorical features to one-hot encoded features, using the 'cat' column transformer.
+
+Here's how you trace back through the trained model to access the one-hot encoded feature names:
+"""
+
+model.best_estimator_['preprocessor'].named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features)
+
+"""
+array(['sex_female', 'sex_male', 'class_First', 'class_Second',
+       'class_Third', 'who_child', 'who_man', 'who_woman'], dtype=object)
+Notice how the one-hot encoded features are named - for example, sex was split into two boolean features indicating whether the sex is male or female.
+
+Great! Now let's get all of the feature importances and associate them with their transformed feature names.
+"""
+
+feature_importances = model.best_estimator_['classifier']
+
+# Combine the numerical and one-hot encoded categorical feature names
+feature_names = numerical_features + list(model.best_estimator_['preprocessor'].named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features))
+
+#Display the feature importances in a bar plot
+#Define a feature importance DataFrame, then plot it
+
+importance_df = pd.DataFrame({'Feature': feature_names,
+                              'Importance': feature_importances
+                             }).sort_values(by='Importance', ascending=False)
+
+plt.figure()
+plt.barh(importance_df['Feature'], importance_df['Importance'], color='skyblue')
+plt.gca.invert_yaxis()
+plt.title('Most Important Features in predicting whether a passenger survived')
+plt.xlabel('Importance Score')
+plt.show()
+
+#Print the test score
+test_score = model.score(X_test, y_test)
+print(f"test score :{test_score : .2f}") # 81.56%
 
