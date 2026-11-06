@@ -246,7 +246,7 @@ Notice how the one-hot encoded features are named - for example, sex was split i
 Great! Now let's get all of the feature importances and associate them with their transformed feature names.
 """
 
-feature_importances = model.best_estimator_['classifier']
+feature_importances = model.best_estimator_['classifier'].feature_importances_
 
 # Combine the numerical and one-hot encoded categorical feature names
 feature_names = numerical_features + list(model.best_estimator_['preprocessor'].named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features))
