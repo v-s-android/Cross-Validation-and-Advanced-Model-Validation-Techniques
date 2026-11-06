@@ -269,3 +269,80 @@ plt.show()
 test_score = model.score(X_test, y_test)
 print(f"test score :{test_score : .2f}") # 81.56%
 
+# Trying another model
+
+# Replace RandomForestClassifier with LogisticRegression
+pipeline.set_params(classifier = LogisticRegression(random_state=10))
+
+# Define a new grid with Logistic Regression parameters
+param_grid = {
+    # 'classifier__n_estimators': [50, 100],
+    # 'classifier__max_depth': [None, 10, 20],
+    # 'classifier__min_samples_split': [2, 5],
+    'classifier__solver' : ['liblinear'],
+    'classifier__penalty': ['l1', 'l2'],
+    'classifier__class_weight' : [None, 'balanced']
+}
+
+# update the model estimator with the logistic regrssion pipeline
+model.estimator = pipeline
+model.param_grid = param_grid
+
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+# Exercise 7. Display the clasification report for the new model and compare the results to your previous model.
+print(classification_report(y_test , y_pred))
+"""
+             precision    recall  f1-score   support
+
+           0       0.84      0.89      0.86       110
+           1       0.81      0.72      0.76        69
+
+    accuracy                           0.83       179
+   macro avg       0.82      0.81      0.81       179
+weighted avg       0.83      0.83      0.82       179
+"""
+
+# Exercise 8. Display the confusion matrix for the new model and compare the results to your previous model.
+
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+plt.figure()
+sns.heatmap(conf_matrix , annot=True, cmap='Blues', fmt='d')
+
+# Set the title and labels
+plt.title('Titanic Classification Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
+# Extract the logistic regression feature coefficients and plot their magnitude in a bar chart.
+
+coefficients = model.best_estimator_.named_steps['classifier'].coef_[0]
+
+feature_names = numerical_features + list(model.best_estimator_.named_steps['preprocessor'].named_trasnformer['cat'].named_steps['onehot'].get_feature_names_out(categorical_features))
+
+# create a data frame
+
+coffs_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Coefficient': coefficients }).sort_values(By=coefficients, ascending = False)
+
+plt.figure()
+plt.barh(coffs_df['Feature'], coffs_df['Coefficient'], color='skyblue')
+plt.gca().invert_yaxis()
+plt.title('Feature Coefficient magnitudes for Logistic Regression model')
+plt.xlabel('Coefficient Magnitude')
+plt.show()
+
+# Print test score
+test_score = model.best_estimator_.score(X_test, y_test)
+print(f"\nTest set accuracy: {test_score:.2%}")
+
+
+
