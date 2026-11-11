@@ -243,3 +243,86 @@ No     5766
 Yes    1791
 Name: count, dtype: int64
 """
+
+"""
+Exercise 4. What can you conclude from these counts?
+How often does it rain annualy in the Melbourne area?
+How accurate would you be if you just assumed it won't rain every day?
+Is this a balanced dataset?
+Next steps?
+
+## Write your response here and convert the cell to a markdown.
+1) Out of total 7557 observations, there were only 1791 rainy days i.e, so taking the percentage of (1791/7557)*100 this results in approximately 24%.
+so annually 365*0.24 ,it rained apprximately for 86 days
+2) There are 5766 days where it did not rain in 7557. so the accuracy will be (5766/7557)% i.e, so I would be approximately 76% accurate it wont rain everyday.
+3) the dataset is imbalanced, as the number of observations of "No" and "Yes" in RainToday column are different.
+4) the next steps wpuld be to split the dataset and build the model
+
+"""
+
+# Exercise 5. Split data into training and test sets, ensuring target stratification
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+"""
+Define preprocessing transformers for numerical and categorical features
+Exercise 6. Automatically detect numerical and categorical columns and assign them to separate numeric and categorical features
+"""
+numeric_features = X_train.select_dtypes(include=['number']).columns.tolist()
+categorical_features = X_train.select_dtypes(include=['object', 'category']).columns.tolist()
+
+# Define separate transformers for both feature types and combine them into a single preprocessing transformer
+
+# Scale the numeric features
+numeric_transformer = Pipeline(steps=[('scaler', StandardScaler())])
+
+# One-hot encode the categoricals 
+categorical_transformer = Pipeline(steps=[('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+# Exercise 7. Combine the transformers into a single preprocessing column transformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer, numeric_features),
+        ('cat', categorical_transformer, categorical_features)
+    ]
+)
+
+# Exercise 8. Create a pipeline by combining the preprocessing with a Random Forest classifier
+pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier', RandomForestClassifier(random_state=42))
+])
+
+# Define a parameter grid to use in a cross validation grid search model optimizer
+param_grid = {
+    'classifier__n_estimators': [50, 100],
+    'classifier__max_depth': [None, 10, 20],
+    'classifier__min_samples_split': [2, 5]
+}
+
+"""
+Pipeline usage in crossvalidation
+Recall that the pipeline is repeatedly used within the crossvalidation by fitting on each internal training fold and predicting on its corresponding validation fold
+
+Perform grid search cross-validation and fit the best model to the training data
+Select a cross-validation method, ensuring target stratification during validation
+"""
+
+cv = StratifiedKFold(n_splits=5, shuffle=True)
+
+# Exercise 9. Instantiate and fit GridSearchCV to the pipeline
+grid_search = GridSearchCV(estimator= pipeline , param_grid = param_grid , cv=cv, scoring='accuracy', verbose=2)  
+grid_search.fit(X_train, y_train)
+"""
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+[CV] END classifier__max_depth=None, classifier__min_samples_split=2, classifier__n_estimators=50; total time=   0.3s
+[CV] END classifier__max_depth=None, classifier__min_samples_split=2, classifier__n_estimators=50; total time=   0.3s
+...
+[CV] END classifier__max_depth=20, classifier__min_samples_split=5, classifier__n_estimators=100; total time=   0.6s
+[CV] END classifier__max_depth=20, classifier__min_samples_split=5, classifier__n_estimators=100; total time=   0.6s
+"""
+
+#Print the best parameters and best crossvalidation score
+print("\nBest parameters found: ", grid_search.best_params_) # Best parameters found:  {'classifier__max_depth': 20, 'classifier__min_samples_split': 5, 'classifier__n_estimators': 100}
+print("Best cross-validation score: {:.2f}".format(grid_search.best_score_)) # Best cross-validation score: 0.81
+
+
