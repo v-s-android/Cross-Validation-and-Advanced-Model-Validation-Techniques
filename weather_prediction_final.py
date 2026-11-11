@@ -214,3 +214,32 @@ df['Season'] = df['Date'].apply(date_to_season)
 df=df.drop(columns=['Date'])
 df
 
+"""
+Looks like we have a good set of features to work with.
+
+Let's go ahead and build our model.
+
+But wait, let's take a look at how well balanced our target is.
+"""
+
+"""
+Exercise 2. Define the feature and target dataframes
+"""
+# Write your response.
+y = df['RainToday']
+X = df.drop([ 'RainToday', 'Evaporation', 'Sunshine', 'Rainfall', 'MaxTemp', 'WindGustSpeed', 'WindGustDir', 'Temp3pm', 'WindDir3pm', 'WindSpeed3pm', 'Humidity3pm', 'Pressure3pm', 'Cloud3pm' ], axis=1)
+
+
+"""
+Exercise 3. How balanced are the classes?
+Display the counts of each class.
+
+Complete the following code:
+"""
+y.value_counts()
+"""
+RainToday
+No     5766
+Yes    1791
+Name: count, dtype: int64
+"""
