@@ -325,4 +325,39 @@ Fitting 5 folds for each of 12 candidates, totalling 60 fits
 print("\nBest parameters found: ", grid_search.best_params_) # Best parameters found:  {'classifier__max_depth': 20, 'classifier__min_samples_split': 5, 'classifier__n_estimators': 100}
 print("Best cross-validation score: {:.2f}".format(grid_search.best_score_)) # Best cross-validation score: 0.81
 
+# Exercise 10. Display your model's estimated score
+test_score = grid_search.score(X_test, y_test)  
+print("Test set score: {:.2f}".format(test_score)) # Test set score: 0.79
+
+"""
+So we have a reasonably accurate classifer, which is expected to correctly predict about 84% of the time whether it will rain today in the Melbourne area.
+But careful here. Let's take a deeper look at the results.
+
+The best model is stored within the gridsearch object.
+"""
+
+# Exercise 11. Get the model predictions from the grid search estimator on the unseen data
+y_pred = grid_search.predict(X_test)
+
+# Exercise 12. Print the classification report
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+"""
+Classification Report:
+              precision    recall  f1-score   support
+
+          No       0.82      0.93      0.87      1154
+         Yes       0.59      0.32      0.42       358
+
+    accuracy                           0.79      1512
+   macro avg       0.70      0.63      0.64      1512
+weighted avg       0.76      0.79      0.76      1512
+"""
+
+# ## Exercise 13. Plot the confusion matrix 
+conf_matrix = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix= conf_matrix)
+disp.plot(cmap='Blues')
+plt.title('Confusion Matrix')
+plt.show()
 
