@@ -228,7 +228,7 @@ Exercise 2. Define the feature and target dataframes
 # Write your response.
 y = df['RainToday']
 X = df.drop([ 'RainToday', 'Evaporation', 'Sunshine', 'Rainfall', 'MaxTemp', 'WindGustSpeed', 'WindGustDir', 'Temp3pm', 'WindDir3pm', 'WindSpeed3pm', 'Humidity3pm', 'Pressure3pm', 'Cloud3pm' ], axis=1)
-
+# 'WindDir9am', 'WindSpeed9am', 'Humidity9am', 'Pressure9am', 'Cloud9am', 'Temp9am'
 
 """
 Exercise 3. How balanced are the classes?
