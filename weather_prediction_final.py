@@ -228,7 +228,7 @@ Exercise 2. Define the feature and target dataframes
 # Write your response.
 y = df['RainToday']
 X = df.drop([ 'RainToday', 'Evaporation', 'Sunshine', 'Rainfall', 'MaxTemp', 'WindGustSpeed', 'WindGustDir', 'Temp3pm', 'WindDir3pm', 'WindSpeed3pm', 'Humidity3pm', 'Pressure3pm', 'Cloud3pm' ], axis=1)
-# 'WindDir9am', 'WindSpeed9am', 'Humidity9am', 'Pressure9am', 'Cloud9am', 'Temp9am'
+# 'WindDir9am', 
 
 """
 Exercise 3. How balanced are the classes?
@@ -361,3 +361,129 @@ disp.plot(cmap='Blues')
 plt.title('Confusion Matrix')
 plt.show()
 
+# What is the true positive rate? There will be a question on this in the assignment that follows.
+# Ans: Consider the confusion matrix or the classification report and claculate the true positve rate given the information.
+
+"""
+Feature importances
+Recall that to obtain the categorical feature importances, we have to work our way backward through the modelling pipeline to associate the feature
+importances with their original input variables, not the one-hot encoded ones. We don't need to do this for the numeric variables because we didn't modify their names in any way.
+Remember we went from categorical features to one-hot encoded features, using the 'cat' column transformer.
+
+Let's get all of the feature importances and associate them with their transformed features
+"""
+
+# Exercise 14. Extract the feature importances
+feature_importances = grid_search.best_estimator_['classifier'].feature_importances_
+# Now let's extract the feature importances and plot them as a bar graph.
+
+# Combine numeric and categorical feature names
+feature_names = numeric_features + list(grid_search.best_estimator_['preprocessor']
+                                        .named_transformers_['cat']
+                                        .named_steps['onehot']
+                                        .get_feature_names_out(categorical_features))
+
+feature_importances = grid_search.best_estimator_['classifier'].feature_importances_
+
+importance_df = pd.DataFrame({'Feature': feature_names,'Importance': feature_importances}).sort_values(by='Importance', ascending=False)
+
+N = 10  # Change this number to display more or fewer features
+top_features = importance_df.head(N)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.barh(top_features['Feature'], top_features['Importance'], color='skyblue')
+plt.gca().invert_yaxis()  # Invert y-axis to show the most important feature on top
+plt.title(f'Top {N} Most Important Features in predicting whether it will rain today')
+plt.xlabel('Importance Score')
+plt.show()
+
+# Point to note - 3
+# Identify the most important feature for predicting whether it will rain based on the feature importance bar graph. There will be a question on this in the assignment that follows.
+#Ans:  pressure9am
+
+"""
+Try another model
+Some thoughts.
+In practice you would want to try out different models and even revisit the data analysis to improve your model's performance. Maybe you can engineer better features,
+drop irrelevant or redundant ones, project your data onto a dimensional feature space, or impute missing values to be able to use more data. You can also try a larger
+set of parameters to define you search grid, or even engineer new features using cluster analysis. You can even include the clustering algorithm's hyperparameters in
+your search grid!
+
+With Scikit-learn's powerful pipeline and GridSearchCV classes, this is easy to do in a few steps.
+
+Exercise 15. Update the pipeline and the parameter grid
+Let's update the pipeline and the parameter grid and train a Logistic Regression model and compare the performance of the two models. You'll need to replace the 
+clasifier with LogisticRegression. We have supplied the parameter grid for you.
+"""
+
+
+# Replace RandomForestClassifier with LogisticRegression
+pipeline.set_params(classifier = LogisticRegression(random_state=42))
+
+# update the model's estimator to use the new pipeline
+grid_search.estimator = pipeline
+
+# Define a new grid with Logistic Regression parameters
+param_grid = {
+    # 'classifier__n_estimators': [50, 100],
+    # 'classifier__max_depth': [None, 10, 20],
+    # 'classifier__min_samples_split': [2, 5],
+    'classifier__solver' : ['liblinear'],
+    'classifier__penalty': ['l1', 'l2'],
+    'classifier__class_weight' : [None, 'balanced']
+}
+
+grid_search.param_grid = param_grid
+
+# Fit the updated pipeline with LogisticRegression
+grid_search.fit(X_train, y_train)
+
+# Make predictions
+y_pred = grid_search.predict(X_test)
+
+"""
+Compare the results to your previous model.¶
+Display the clasification report and the confusion matrix for the new model and compare your results with the previous model.
+"""
+print(classification_report(y_test, y_pred))
+"""
+              precision    recall  f1-score   support
+
+          No       0.80      0.93      0.86      1154
+         Yes       0.54      0.27      0.36       358
+
+    accuracy                           0.77      1512
+   macro avg       0.67      0.60      0.61      1512
+weighted avg       0.74      0.77      0.74      1512
+"""
+
+# Generate the confusion matrix 
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+plt.figure()
+sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='d')
+
+# Set the title and labels
+plt.title('Titanic Classification Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
+# What can you conclude about the model performances?
+
+"""
+Points to note - 4
+Compare the accuracy and true positive rate of rainfall predictions between the LogisticRegression model and the RandomForestClassifier model.
+
+Note: Make sure to provide the answer in the form of a list using either bullets or numbers.
+
+Compare the accuracy percentages of both the classifiers.
+
+Provide the details of the number of correct predictions.
+
+Provide the true positive rate of LogisticRegression Classifier.
+"""
